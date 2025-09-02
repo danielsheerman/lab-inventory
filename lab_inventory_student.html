@@ -15,7 +15,19 @@ h1{font-size:20px;margin:0 0 10px}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 input[type=text]{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:12px;font:inherit}
 .list{display:grid;gap:8px;margin-top:10px}
-.item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border:1px solid #ececf3;border-radius:12px}
+.item {
+  display: flex;
+  flex-wrap: wrap;             /* allow wrapping on small screens */
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #ececf3;
+  border-radius: 12px;
+}
+.item button {
+  margin-left: auto;           /* push Show button to the right if space */
+}
 .item:hover{background:#f6f7ff;border-color:#dfe5ff}
 .btn{appearance:none;border:1px solid #d7d7e4;background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font:inherit}
 .plan-wrap{position:relative;border:1px solid #ececf3;border-radius:14px;overflow:hidden}
