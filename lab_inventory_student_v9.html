@@ -994,9 +994,13 @@ const EMBEDDED_DATA = {
       const cub  = it.cupboard || it.Cupboard || '';
       const notes= it.notes || it.Notes || '';
       const div=document.createElement('div'); div.className='item';
-      div.innerHTML=`<div><div><strong>${escapeHtml(name)}</strong></div>
-        <div class="small">Cupboard <strong>${escapeHtml(cub)}</strong>${notes?` · ${escapeHtml(notes)}`:''}</div></div>
-        <button class="btn" data-c="${escapeHtml(cub)}">Show</button>`;
+      div.innerHTML=`<div>
+    <div><strong>${escapeHtml(name)}</strong> · 
+      <a href="#" class="showlink" data-c="${escapeHtml(cub)}">Show</a>
+    </div>
+    <div class="small">Cupboard <strong>${escapeHtml(cub)}</strong>${notes?` · ${escapeHtml(notes)}`:''}</div>
+  </div>
+  <button class="btn" data-c="${escapeHtml(cub)}">Show</button>`;
       div.querySelector('button').addEventListener('click',()=>{
         const key=findKeyForCupboard(cub);
         if(!key){ alert('That item is mapped to cupboard "'+cub+'", but this cupboard is not on the map.'); return; }
