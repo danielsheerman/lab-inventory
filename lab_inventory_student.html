@@ -6,7 +6,8 @@
 <title>Lab Inventory Finder — Student</title>
 <style>
 :root{--gap:16px;--radius:14px;--shadow:0 6px 24px rgba(0,0,0,.08)}
-*{box-sizing:border-box}body{margin:0;background:#f7f7fb;color:#111;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#f7f7fb;color:#111;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
 .wrap{max-width:1100px;margin:0 auto;padding:18px var(--gap)}
 h1{font-size:20px;margin:0 0 10px}
 .card{background:#fff;border:1px solid #ececf3;border-radius:14px;box-shadow:var(--shadow);margin-top:14px}
@@ -15,20 +16,34 @@ h1{font-size:20px;margin:0 0 10px}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 input[type=text]{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:12px;font:inherit}
 .list{display:grid;gap:8px;margin-top:10px}
+
+/* Responsive result items */
 .item {
   display: flex;
-  flex-wrap: wrap;             /* allow wrapping on small screens */
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;   /* stack by default (good for Teams narrow view) */
+  gap: 6px;
   padding: 10px 12px;
   border: 1px solid #ececf3;
   border-radius: 12px;
 }
-.item button {
-  margin-left: auto;           /* push Show button to the right if space */
+.item > div {
+  width: 100%;
+  word-break: break-word;
 }
-.item:hover{background:#f6f7ff;border-color:#dfe5ff}
+.item > button {
+  align-self: flex-end;
+}
+@media (min-width: 700px) {
+  .item {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .item > button {
+    margin-left: auto;
+  }
+}
+
 .btn{appearance:none;border:1px solid #d7d7e4;background:#fff;border-radius:12px;padding:8px 10px;cursor:pointer;font:inherit}
 .plan-wrap{position:relative;border:1px solid #ececf3;border-radius:14px;overflow:hidden}
 .plan{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
@@ -73,7 +88,6 @@ canvas#overlay{position:absolute;left:0;top:0;width:100%;height:100%;pointer-eve
 /*** ===== 1) EMBEDDED DATA PLACEHOLDER =====
  * After exporting from Admin, paste the entire JSON (items+boxes+planURL)
  * between the backticks below (replace null). Keep it valid JSON.
- * Example start: {"items":[...], "boxes":{...}, "planURL":"data:image/png;base64,..."}
  */
 const EMBEDDED_DATA = {
   "items": [
@@ -891,7 +905,7 @@ const EMBEDDED_DATA = {
         $plan=el('plan'), $overlay=el('overlay'),
         $noData=el('noData'), $btnImport=el('btnImport'), $fileInput=el('fileInput');
 
-  // ---- Data loading: prefer embedded, else localStorage, else allow one-time import
+  // ---- Data loading
   function loadFromEmbedded(){
     if(!EMBEDDED_DATA) return false;
     const o = EMBEDDED_DATA;
@@ -913,7 +927,6 @@ const EMBEDDED_DATA = {
     try{ localStorage.setItem('lif_student_data', JSON.stringify({items:state.items, boxes:state.boxes, planURL:state.planURL})); }catch{}
   }
 
-  // ---- Helpers
   const normalize=s=>(s||'').toString().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
   function escapeHtml(s){return String(s).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function toPixels(b){ const r=$plan.getBoundingClientRect(); return {x:b.x*r.width/100,y:b.y*r.height/100,w:b.w*r.width/100,h:b.h*r.height/100}; }
@@ -955,7 +968,9 @@ const EMBEDDED_DATA = {
 
     if(state.highlight && Date.now()<state.flashUntil){ requestAnimationFrame(drawOverlay); }
   }
-  function pulse(key, ms=2800){
+
+  // 🔵 pulse extended to 5600ms
+  function pulse(key, ms=5600){
     state.highlight=key; state.flashUntil=Date.now()+ms;
     const tick=()=>{ drawOverlay();
       if(Date.now()<state.flashUntil){ requestAnimationFrame(tick); }
@@ -985,7 +1000,7 @@ const EMBEDDED_DATA = {
       div.querySelector('button').addEventListener('click',()=>{
         const key=findKeyForCupboard(cub);
         if(!key){ alert('That item is mapped to cupboard "'+cub+'", but this cupboard is not on the map.'); return; }
-        pulse(key, 1400);
+        pulse(key, 5600);
         setStatus('show → '+cub+' → '+key);
         document.querySelector('.plan-wrap').scrollIntoView({behavior:'smooth',block:'center'});
       });
@@ -993,7 +1008,6 @@ const EMBEDDED_DATA = {
     }
   }
 
-  // ---- Optional fallback import (only shown if no embedded/local data)
   if($btnImport){
     $btnImport.addEventListener('click',()=>{ $fileInput.value=''; $fileInput.click(); });
     $fileInput && $fileInput.addEventListener('change',e=>{
@@ -1017,7 +1031,6 @@ const EMBEDDED_DATA = {
     });
   }
 
-  // ---- Init
   const ok = loadFromEmbedded() || loadFromLocal();
   if (!ok) { $noData.classList.remove('hidden'); setStatus('no data'); }
   if (state.planURL) { $plan.src = state.planURL; setStatus('image loaded'); }
